@@ -13,21 +13,21 @@ RSpec.describe Dry::Configurable::DSL do
   end
 
   it 'compiles a setting with default' do
-    setting = dsl.setting :user, 'root'
+    setting = dsl.setting :user, default: 'root'
 
     expect(setting.name).to be(:user)
     expect(setting.value).to eql('root')
   end
 
   it 'compiles a setting with a reader set' do
-    setting = dsl.setting(:dsn, 'sqlite', reader: true)
+    setting = dsl.setting(:dsn, default: 'sqlite', reader: true)
 
     expect(setting.name).to be(:dsn)
     expect(setting).to be_reader
   end
 
   it 'compiles a setting with a default string value' do
-    setting = dsl.setting(:dsn, 'sqlite')
+    setting = dsl.setting(:dsn, default: 'sqlite')
 
     expect(setting.name).to be(:dsn)
     expect(setting.value).to eql('sqlite')
@@ -36,14 +36,14 @@ RSpec.describe Dry::Configurable::DSL do
   it 'compiles a setting with a default hash value' do
     default = { user: 'root', pass: 'secret' }
 
-    setting = dsl.setting(:dsn, default)
+    setting = dsl.setting(:dsn, default: default)
 
     expect(setting.name).to be(:dsn)
     expect(setting.value).to eql(default)
   end
 
   it 'compiles a setting with a constructor' do
-    setting = dsl.setting(:dsn, 'sqlite') { |value| "jdbc:#{value}" }
+    setting = dsl.setting(:dsn, default: 'sqlite', constructor: -> value { "jdbc:#{value}" })
 
     expect(setting.name).to be(:dsn)
     expect(setting.value).to eql('jdbc:sqlite')

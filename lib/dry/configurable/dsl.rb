@@ -4,7 +4,6 @@ require 'dry/configurable/constants'
 require 'dry/configurable/setting'
 require 'dry/configurable/settings'
 require 'dry/configurable/compiler'
-require 'dry/configurable/dsl/args'
 
 module Dry
   module Configurable
@@ -32,30 +31,32 @@ module Dry
       # @see ClassMethods.setting
       # @api public
       # @return Setting
-      def setting(name, *args, &block)
+      def setting(name, **options, &block)
         unless VALID_NAME.match?(name.to_s)
           raise ArgumentError, "#{name} is not a valid setting name"
         end
 
-        args = Args.new(args)
+        ensure_valid_options options
 
-        args.ensure_valid_options
-
-        default, opts = args
-
-        node = [:setting, [name.to_sym, default, opts == default ? EMPTY_HASH : opts]]
+        node = [:setting, [name.to_sym, options]]
 
         if block
-          if block.arity.zero?
-            ast << [:nested, [node, DSL.new(&block).ast]]
-          else
-            ast << [:constructor, [node, block]]
-          end
+          ast << [:nested, [node, DSL.new(&block).ast]]
         else
           ast << node
         end
 
         compiler.visit(ast.last)
+      end
+
+      private
+
+      # @api private
+      def ensure_valid_options(options)
+        return if options.none?
+
+        keys = options.keys - Setting::OPTIONS
+        raise ArgumentError, "Invalid options: #{keys.inspect}" unless keys.empty?
       end
     end
   end
