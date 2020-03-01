@@ -68,6 +68,11 @@ module Dry
       end
 
       # @api private
+      def evaluated?
+        instance_variable_defined?(:@value)
+      end
+
+      # @api private
       def nested(settings)
         Nested.new(name, input: settings, **options)
       end
@@ -107,7 +112,7 @@ module Dry
       # @api private
       def initialize_copy(source)
         super
-        @value = source.value.dup if source.clonable_value?
+        @value = source.value.dup if source.evaluated? && source.clonable_value?
         @options = source.options.dup
       end
 
