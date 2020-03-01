@@ -31,9 +31,20 @@ module Dry
       # @see ClassMethods.setting
       # @api public
       # @return Setting
-      def setting(name, **options, &block)
+      def setting(name, default = Undefined, **options, &block)
         unless VALID_NAME.match?(name.to_s)
           raise ArgumentError, "#{name} is not a valid setting name"
+        end
+
+        if default != Undefined
+          # TODO: deprecation warning here
+          options = options.merge(default: default)
+        end
+
+        if block && !block.arity.zero?
+          # TODO: deprecation warning here
+          options = options.merge(constructor: block)
+          block = nil
         end
 
         ensure_valid_options options
